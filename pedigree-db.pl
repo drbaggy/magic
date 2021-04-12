@@ -42,7 +42,7 @@ foreach ( keys %dogs ) {
   my $id = $_ =~ m{/(\d+)/i$} ? $1 : '';
   next unless $id;
   my $tr = get_tree( $id, 14 );
-  my $c  = $dogs{$_}[1];
+  my $c  = $dogs{$_}{'max'};
   foreach my $col (@results) {
     foreach (@{$col}) {
       $c++;
