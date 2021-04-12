@@ -7,7 +7,7 @@ use Data::Dumper qw(Dumper);
 use Const::Fast qw(const);
 
 const my $STARTER_GENERATIONS => 2;
-const my $INITAL_FETCH        => 14;
+const my $INITIAL_FETCH       => 14;
 const my $SUB_FETCH           => 12;
 
 my  @results = initial_results_structure();
@@ -15,10 +15,10 @@ my  @results = initial_results_structure();
 $/=undef;
 
 my @starter_trees = map { $_->{'pdo_link'} =~ m{(\d+)} ? $1: () }
-                    @{$results->[$STARTER_GENERATIONS]};
+                    @{$results[$STARTER_GENERATIONS]};
 
 print Dumper(\@starter_trees);
-exit;
+
 
 foreach my $n ( @starter_trees ) {
   my $tree =  get_tree( $n, $INITIAL_FETCH );
@@ -37,7 +37,7 @@ open my $d, '>', 'dogs.yarg';
 foreach ( keys %dogs ) {
   next unless 'SIRE' eq ($parents{$_}{'sire_name'}||'SIRE');
   next unless 'DAM'  eq ($parents{$_}{'dam_name'} ||'DAM');
-  next if depth( $dogs{$_}{'max'} ) <= $INITAL_FETCH + $STARTER_GENERATIONS;
+  next if depth( $dogs{$_}{'max'} ) <= $INITIAL_FETCH + $STARTER_GENERATIONS;
   ## Now we need to look at the information about the dam and sire if we are missing the DAM/SIRE...
   my $id = $_ =~ m{/(\d+)/i$} ? $1 : '';
   next unless $id;
@@ -52,7 +52,7 @@ foreach ( keys %dogs ) {
     }
   }
 
-  $previous = [ {'pdo_link' => $_, 'name'=>$dogs{$_}[2]} ];
+  my $previous = [ {'pdo_link' => $_, 'name'=>$dogs{$_}[2]} ];
   delete $parents{$_};
   foreach my $c2 (@{$tr}) {
     foreach (0..@{$previous}) {
@@ -61,13 +61,14 @@ foreach ( keys %dogs ) {
         'sire_link' => $c2->[$_*2]{'pdo_link'}   || '-',
         'sire_name' => $c2->[$_*2]{'name'}       || 'SIRE',
         'dam_link'  => $c2->[$_*2+1]{'pdo_link'} || '-',
-        'dam_name'  => $c2->[$_*2+1]{'name'}     || 'DAM' ],
-    };
+        'dam_name'  => $c2->[$_*2+1]{'name'}     || 'DAM',
+      };
+    }
   }
 }
 
 open $ofh, '>', 'dam-sire.txt';
-say {$ofh} join "\t", $_, values %{%parents{$_}} foreach keys %ds;
+say {$ofh} join "\t", $_, values %{$parents{$_}} foreach keys %parents;
 close $ofh;
 
 open $ofh, '>', 'dogs.txt';
@@ -82,7 +83,6 @@ foreach my $link ( sort { $dogs{$a} <=> $dogs{$b} } keys %dogs ) {
       $parents{$link}{'dam_link'} ||'-', $parents{$link}{'dam_name'} ||'DAM';
 }
 close $ofh;
-
 ## End of map function....
 
 sub get_tree {
@@ -168,7 +168,7 @@ sub initial_results_structure {
         'sex'     => 'Dam', 'flag'    => '', 'colour'  => 'white and black', 'country' => 'United Kingdom',
         'type'    => 'working', 'kc_code' => 'KCSB 4162CY', 'dob'     => '2011-02-22', },
     ],
-    map { [] } 1 .. $INITAL_FETCH
+    map { [] } 1 .. $INITIAL_FETCH
   );
 }
 
@@ -176,7 +176,7 @@ sub fetch_dog_positions {
   my $res = shift;
   my $c   = 0;
   my %t_dogs = ();
-  foreach my $col (@{$res}}) {
+  foreach my $col (@{$res}) {
     foreach (@{$col}) {
       $c++;
       $t_dogs{ $_->{'pdo_link'} }{'max'}    = $c;
