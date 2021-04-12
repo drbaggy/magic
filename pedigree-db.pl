@@ -1,5 +1,8 @@
+#!/usr/local/bin/perl
+
 use feature qw(say);
 use strict;
+use warnings;
 use Data::Dumper qw(Dumper);
 use Const::Fast qw(const);
 
